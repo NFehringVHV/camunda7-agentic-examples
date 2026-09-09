@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.camunda7-agentic</groupId>
+    <artifactId>camunda7-agentic-examples</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>camunda7-agentic-examples</name>
+    <description>Runnable examples for the camunda7-agentic-starter: a concrete Bedrock worker and a
+        Camunda 7 process demo.</description>
+    <url>https://github.com/camunda7-agentic/camunda7-agentic-examples</url>
+
+    <licenses>
+        <license>
+            <name>Apache-2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <!-- The two example modules deliberately use different Spring Boot lines:
+         - example-worker targets Spring Boot 4 (same as the starter),
+         - example-process targets Spring Boot 3 (compatible with the Camunda 7 community
+           spring-boot starter).
+         Therefore this parent is a plain aggregator; each module declares its own parent. -->
+    <modules>
+        <module>example-worker</module>
+        <module>example-process</module>
+    </modules>
+</project>

@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: Apache-2.0
+spring:
+  application:
+    name: example-worker
+  ai:
+    bedrock:
+      aws:
+        # Credentials resolve from the default AWS chain if left unset (env vars, profile, IAM role).
+        region: ${AWS_REGION:eu-central-1}
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        secret-key: ${AWS_SECRET_ACCESS_KEY:}
+      converse:
+        chat:
+          options:
+            # A Bedrock Converse-capable model id (adjust to what your account has access to).
+            model: ${BEDROCK_MODEL:eu.anthropic.claude-sonnet-4-6}
+            temperature: 0.2
+
+# camunda7-agentic-starter configuration
+agentic:
+  c7:
+    client:
+      # Camunda 7 REST endpoint the worker fetches external tasks from.
+      base-url: ${CAMUNDA_REST_URL:http://localhost:8080/engine-rest}
+      # username: demo
+      # password: demo
+    camunda:
+      # REST endpoint the workers use to load BPMN XML and correlate tool messages.
+      base-url: ${CAMUNDA_REST_URL:http://localhost:8080/engine-rest}
+      # username: demo
+      # password: demo
+    history:
+      # inline | camunda-bytearray | external  (see the starter README for the trade-offs)
+      store: camunda-bytearray
+      byte-array-type: bytes
+    # How business-level failures surface: incident (default) or bpmn-error.
+    business-error-mode: incident
+
+logging:
+  level:
+    io.github.camunda7agentic: INFO
