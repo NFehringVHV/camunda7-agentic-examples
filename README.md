@@ -1,7 +1,7 @@
 # camunda7-agentic-examples
 
 Runnable, end-to-end examples for the
-[`camunda7-agentic-starter`](../camunda7-agentic-starter): an LLM-driven **agentic tool-calling
+[`camunda7-agentic-starter`](https://github.com/NFehringVHV/camunda7-agentic-starter): an LLM-driven **agentic tool-calling
 loop** on top of [Camunda 7](https://docs.camunda.org/manual/7.24/).
 
 Two modules that run side by side:
@@ -10,6 +10,15 @@ Two modules that run side by side:
 | --- | --- | --- | --- |
 | [`example-process`](example-process) | Embedded Camunda 7 engine + REST/Webapp that deploys the `agentic-demo` process and its tool delegates. | 3.3.5 | 8080 |
 | [`example-worker`](example-worker) | Standalone Spring Boot app that adds the starter + **AWS Bedrock** (Spring AI) and runs the agentic external-task workers. | 4.x | (client) |
+
+> **Why is `example-process` on Spring Boot 3 while everything else is on 4?** `example-process`
+> embeds the Camunda 7 engine via the **community** `camunda-bpm-spring-boot-starter-rest`/`-webapp`
+> (7.24), which is **not compatible with Spring Boot 4** — a Boot 4 context fails to start (e.g.
+> `CamundaBpmAutoConfiguration` bean errors). Spring Boot 4 support for the embedded engine exists
+> only in the Camunda **Enterprise** edition (7.24.3-ee+). The `camunda7-agentic-starter` and
+> `example-worker` do **not** embed the engine (they only use the external-task client + BPMN model),
+> so they run on Spring Boot 4 without issue. If/when a Boot-4-capable community engine (or Camunda 8)
+> is targeted, this module can be raised too.
 
 The two run as **separate processes**: `example-worker` connects to `example-process` over the
 Camunda REST API (`http://localhost:8080/engine-rest`) and drives the loop. This mirrors a real
@@ -32,6 +41,12 @@ tools as BPMN event sub-processes:
 - **`sendEmail`** — pretends to send an email (handled by `SendEmailDelegate`).
 
 Given a `userPrompt`, the LLM decides which tool(s) to call, in which order, and when it is done.
+
+> **Note.** The tool delegates deliberately sleep for a few seconds. This simulates a real tool
+> calling a slower downstream system and, as a side effect, guarantees the main flow is already
+> waiting at the `LLM-Result` catch before the tool signals its result back — see the *Known
+> limitation — correlation timing* note in the starter's
+> [Tool convention](https://github.com/NFehringVHV/camunda7-agentic-starter#tool-convention).
 
 ---
 

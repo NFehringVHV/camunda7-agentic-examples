@@ -12,7 +12,7 @@
     <name>camunda7-agentic-examples</name>
     <description>Runnable examples for the camunda7-agentic-starter: a concrete Bedrock worker and a
         Camunda 7 process demo.</description>
-    <url>https://github.com/camunda7-agentic/camunda7-agentic-examples</url>
+    <url>https://github.com/NFehringVHV/camunda7-agentic-examples</url>
 
     <licenses>
         <license>

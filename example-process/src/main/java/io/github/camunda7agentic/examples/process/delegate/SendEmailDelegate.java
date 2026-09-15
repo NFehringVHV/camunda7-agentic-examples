@@ -26,6 +26,12 @@ public class SendEmailDelegate implements JavaDelegate {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendEmailDelegate.class);
 
+    /**
+     * Deliberate delay simulating a slow downstream system. It also side-steps a known
+     * correlation-timing limitation of the simple sequential demo topology: the tool must not throw
+     * its {@code LLM-Result} message before the main flow is parked at the catch. See the
+     * "Known limitation — correlation timing" note in the starter's Tool convention.
+     */
     static final long SIMULATED_SYSTEM_CALL_MS = 10_000L;
 
     @Override

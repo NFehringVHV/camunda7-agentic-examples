@@ -5,6 +5,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Spring Boot 3, NOT 4: this module embeds the Camunda 7 engine via the community
+         camunda-bpm-spring-boot-starter, which is not Spring Boot 4 compatible (Boot 4 support
+         exists only in Camunda EE 7.24.3-ee+). The starter and example-worker are on Boot 4;
+         see the "Why is example-process on Spring Boot 3" note in the examples README. -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
