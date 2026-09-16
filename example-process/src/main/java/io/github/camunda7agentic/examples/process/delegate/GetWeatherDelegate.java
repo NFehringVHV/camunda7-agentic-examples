@@ -19,24 +19,20 @@ import java.util.Map;
  *
  * <p>Reads {@code location} from the scope and writes {@code toolCallResult} as a {@link Map}. The
  * format is intentionally stable because it is fed back to the LLM as JSON in the history.
+ *
+ * <p>The demo simulates a slow downstream system via a timer intermediate catch event in the BPMN
+ * (after this delegate), not via {@code Thread.sleep} here. A timer is a wait state: it commits and
+ * releases the exclusive process-instance lock, so the {@code LLM-Result} catch can be subscribed
+ * before the tool result is correlated. See the "Known limitation - correlation timing" note in the
+ * starter's Tool convention.
  */
 @Component("getWeatherDelegate")
 public class GetWeatherDelegate implements JavaDelegate {
 
     private static final Logger LOG = LoggerFactory.getLogger(GetWeatherDelegate.class);
 
-    /**
-     * Deliberate delay simulating a slow downstream system. It also side-steps a known
-     * correlation-timing limitation of the simple sequential demo topology: the tool must not throw
-     * its {@code LLM-Result} message before the main flow is parked at the catch. See the
-     * "Known limitation — correlation timing" note in the starter's Tool convention.
-     */
-    static final long SIMULATED_SYSTEM_CALL_MS = 10_000L;
-
     @Override
     public void execute(DelegateExecution execution) {
-        simulateSystemCall();
-
         Object locationVar = execution.getVariable("location");
         String location = locationVar == null ? "unknown" : locationVar.toString();
 
@@ -48,18 +44,6 @@ public class GetWeatherDelegate implements JavaDelegate {
 
         LOG.info("GetWeatherDelegate: location={} result={}", location, result);
         execution.setVariable("toolCallResult", result);
-    }
-
-    /**
-     * Simulates the call of a slow external system (e.g. a weather API) so the agentic demo has
-     * realistic runtimes. Package-private so tests can override / shorten the wait.
-     */
-    void simulateSystemCall() {
-        try {
-            Thread.sleep(SIMULATED_SYSTEM_CALL_MS);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     private int deterministicTemperature(String location) {

@@ -66,9 +66,17 @@
         <bpmn:messageEventDefinition id="MessageEventDefinition_08evzzs" messageRef="Msg_sendEmail" />
       </bpmn:startEvent>
       <bpmn:sequenceFlow id="Flow_1dlwpiw" sourceRef="Event_1dmxcvf" targetRef="Activity_0q8uboi" />
-      <bpmn:sequenceFlow id="Flow_0y3gf7n" sourceRef="Activity_0q8uboi" targetRef="Event_05r8gxf" />
-      <bpmn:endEvent id="Event_05r8gxf" name="LLM-Result">
+      <bpmn:sequenceFlow id="Flow_0y3gf7n" sourceRef="Activity_0q8uboi" targetRef="Timer_sendEmail" />
+      <bpmn:sequenceFlow id="Flow_sendEmail_timer" sourceRef="Timer_sendEmail" targetRef="Event_05r8gxf" />
+      <bpmn:intermediateCatchEvent id="Timer_sendEmail" name="Simulate slow system">
         <bpmn:incoming>Flow_0y3gf7n</bpmn:incoming>
+        <bpmn:outgoing>Flow_sendEmail_timer</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerDef_sendEmail">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2S</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:endEvent id="Event_05r8gxf" name="LLM-Result">
+        <bpmn:incoming>Flow_sendEmail_timer</bpmn:incoming>
         <bpmn:messageEventDefinition id="MessageEventDefinition_1xcfotg" camunda:expression="${execution.processEngineServices.runtimeService.createMessageCorrelation(&#39;LLM-Result&#39;).processInstanceId(execution.processInstanceId).setVariable(&#39;toolCallResult&#39;, toolCallResult).correlate()}" />
       </bpmn:endEvent>
       <bpmn:serviceTask id="Activity_0q8uboi" name="Send email" camunda:delegateExpression="${sendEmailDelegate}">
@@ -88,7 +96,7 @@
         <bpmn:messageEventDefinition id="MessageEventDefinition_0q9bx40" messageRef="Msg_getWeather" />
       </bpmn:startEvent>
       <bpmn:endEvent id="Event_1i3fa6w" name="LLM-Result">
-        <bpmn:incoming>Flow_0bagva0</bpmn:incoming>
+        <bpmn:incoming>Flow_getWeather_timer</bpmn:incoming>
         <bpmn:messageEventDefinition id="MessageEventDefinition_0wrd2ky" camunda:expression="${execution.processEngineServices.runtimeService.createMessageCorrelation(&#39;LLM-Result&#39;).processInstanceId(execution.processInstanceId).setVariable(&#39;toolCallResult&#39;, toolCallResult).correlate()}" />
       </bpmn:endEvent>
       <bpmn:serviceTask id="Activity_0nm3vx8" name="Get weather" camunda:delegateExpression="${getWeatherDelegate}">
@@ -96,7 +104,15 @@
         <bpmn:outgoing>Flow_0bagva0</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="Flow_0w55kz2" sourceRef="Event_1s1o62r" targetRef="Activity_0nm3vx8" />
-      <bpmn:sequenceFlow id="Flow_0bagva0" sourceRef="Activity_0nm3vx8" targetRef="Event_1i3fa6w" />
+      <bpmn:sequenceFlow id="Flow_0bagva0" sourceRef="Activity_0nm3vx8" targetRef="Timer_getWeather" />
+      <bpmn:intermediateCatchEvent id="Timer_getWeather" name="Simulate slow system">
+        <bpmn:incoming>Flow_0bagva0</bpmn:incoming>
+        <bpmn:outgoing>Flow_getWeather_timer</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerDef_getWeather">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT2S</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:sequenceFlow id="Flow_getWeather_timer" sourceRef="Timer_getWeather" targetRef="Event_1i3fa6w" />
     </bpmn:subProcess>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_agentic-demo">
@@ -136,16 +152,16 @@
         <dc:Bounds x="560" y="180" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_08i65v7_di" bpmnElement="Activity_1o2n3ok" isExpanded="true">
-        <dc:Bounds x="320" y="640" width="350" height="200" />
+        <dc:Bounds x="320" y="640" width="430" height="200" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0m4e316_di" bpmnElement="Event_1dmxcvf">
         <dc:Bounds x="360" y="722" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_00d4l0a_di" bpmnElement="Event_05r8gxf">
-        <dc:Bounds x="612" y="722" width="36" height="36" />
+        <dc:Bounds x="682" y="722" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="601" y="765" width="58" height="14" />
+          <dc:Bounds x="671" y="765" width="58" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1w22yxg_di" bpmnElement="Activity_0q8uboi">
@@ -157,19 +173,19 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0y3gf7n_di" bpmnElement="Flow_0y3gf7n">
         <di:waypoint x="550" y="740" />
-        <di:waypoint x="612" y="740" />
+        <di:waypoint x="590" y="740" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="BPMNShape_11z3fri" bpmnElement="Activity_0pnuvic" isExpanded="true">
-        <dc:Bounds x="320" y="400" width="350" height="200" />
+        <dc:Bounds x="320" y="400" width="430" height="200" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_02j5bj8" bpmnElement="Event_1s1o62r">
         <dc:Bounds x="360" y="482" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_136luez" bpmnElement="Event_1i3fa6w">
-        <dc:Bounds x="612" y="482" width="36" height="36" />
+        <dc:Bounds x="682" y="482" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="601" y="525" width="58" height="14" />
+          <dc:Bounds x="671" y="525" width="58" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1frlou3" bpmnElement="Activity_0nm3vx8">
@@ -182,7 +198,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_0nk09ro" bpmnElement="Flow_0bagva0">
         <di:waypoint x="550" y="500" />
-        <di:waypoint x="612" y="500" />
+        <di:waypoint x="590" y="500" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Edge_Flow_Start_to_Llm" bpmnElement="Flow_Start_to_Llm">
         <di:waypoint x="238" y="220" />
@@ -209,6 +225,26 @@
       <bpmndi:BPMNEdge id="Flow_1f8mf1y_di" bpmnElement="Flow_1f8mf1y">
         <di:waypoint x="660" y="220" />
         <di:waypoint x="732" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Timer_getWeather_di" bpmnElement="Timer_getWeather">
+        <dc:Bounds x="590" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="566" y="525" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_getWeather_timer_di" bpmnElement="Flow_getWeather_timer">
+        <di:waypoint x="626" y="500" />
+        <di:waypoint x="682" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Timer_sendEmail_di" bpmnElement="Timer_sendEmail">
+        <dc:Bounds x="590" y="722" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="566" y="765" width="84" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_sendEmail_timer_di" bpmnElement="Flow_sendEmail_timer">
+        <di:waypoint x="626" y="740" />
+        <di:waypoint x="682" y="740" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

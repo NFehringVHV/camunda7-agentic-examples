@@ -20,24 +20,20 @@ import java.util.Map;
  * <p>Reads {@code to}, {@code subject}, {@code body} from the scope and writes {@code toolCallResult}
  * as a {@link Map}. Nothing is actually sent - the demo only logs and returns a "sent" result to the
  * LLM.
+ *
+ * <p>The demo simulates a slow downstream system via a timer intermediate catch event in the BPMN
+ * (after this delegate), not via {@code Thread.sleep} here. A timer is a wait state: it commits and
+ * releases the exclusive process-instance lock, so the {@code LLM-Result} catch can be subscribed
+ * before the tool result is correlated. See the "Known limitation - correlation timing" note in the
+ * starter's Tool convention.
  */
 @Component("sendEmailDelegate")
 public class SendEmailDelegate implements JavaDelegate {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendEmailDelegate.class);
 
-    /**
-     * Deliberate delay simulating a slow downstream system. It also side-steps a known
-     * correlation-timing limitation of the simple sequential demo topology: the tool must not throw
-     * its {@code LLM-Result} message before the main flow is parked at the catch. See the
-     * "Known limitation — correlation timing" note in the starter's Tool convention.
-     */
-    static final long SIMULATED_SYSTEM_CALL_MS = 10_000L;
-
     @Override
     public void execute(DelegateExecution execution) {
-        simulateSystemCall();
-
         String to = asString(execution.getVariable("to"));
         String subject = asString(execution.getVariable("subject"));
         String body = asString(execution.getVariable("body"));
@@ -53,18 +49,6 @@ public class SendEmailDelegate implements JavaDelegate {
         result.put("source", "agentic-demo (fake email)");
 
         execution.setVariable("toolCallResult", result);
-    }
-
-    /**
-     * Simulates the call of a slow external system (e.g. a mail server) so the agentic demo has
-     * realistic runtimes. Package-private so tests can override / shorten the wait.
-     */
-    void simulateSystemCall() {
-        try {
-            Thread.sleep(SIMULATED_SYSTEM_CALL_MS);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     private String asString(Object value) {

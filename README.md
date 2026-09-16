@@ -42,10 +42,12 @@ tools as BPMN event sub-processes:
 
 Given a `userPrompt`, the LLM decides which tool(s) to call, in which order, and when it is done.
 
-> **Note.** The tool delegates deliberately sleep for a few seconds. This simulates a real tool
-> calling a slower downstream system and, as a side effect, guarantees the main flow is already
-> waiting at the `LLM-Result` catch before the tool signals its result back — see the *Known
-> limitation — correlation timing* note in the starter's
+> **Note.** Each tool sub-process contains a **timer intermediate catch event** (`PT2S`) after the
+> tool delegate, simulating a real tool calling a slower downstream system. The timer is not just
+> cosmetic: it is a *wait state* that commits and releases the exclusive process-instance lock, so
+> the `LLM-Result` catch is subscribed before the tool result is correlated. This practically
+> eliminates the correlation race (and ensures each tool delegate runs exactly once). See the
+> *Known limitation — correlation timing* note in the starter's
 > [Tool convention](https://github.com/NFehringVHV/camunda7-agentic-starter#tool-convention).
 
 ---
